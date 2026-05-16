@@ -205,6 +205,8 @@ class PolicyRepository:
             "page_size": page_size,
             "items": results
         }
+
+    def delete_policy(self, policy_id: int) -> bool:
         """Deletes a policy. Associated values/tags are deleted via CASCADE."""
         cursor = self.conn.cursor()
         cursor.execute("DELETE FROM policies WHERE id = ?", (policy_id,))

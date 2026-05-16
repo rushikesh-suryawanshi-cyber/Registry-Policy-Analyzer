@@ -5,6 +5,7 @@ from admx_parser.scripting.mapper import PolicyMapper
 from admx_parser.scripting.exceptions import PolicyValidationError, TemplateNotFoundError, ScriptGenerationError
 from jinja2 import Environment
 from jinja2.exceptions import TemplateNotFound
+from langchain_community.llms import Ollama
 
 class ScriptGenerationStrategy(ABC):
 
@@ -60,3 +61,43 @@ class RegFileStrategy(ScriptGenerationStrategy):
         ops = PolicyMapper.convert_policy_to_operations(policy)
         grouped = PolicyMapper.get_grouped_operations(ops)
         return template.render(grouped_operations=grouped)
+
+class AIGeneratedScriptStrategy(ScriptGenerationStrategy):
+    def __init__(self, model_name: str = "llama3"):
+        self.model_name = model_name
+
+    def generate(self, policy: Policy, env: Environment) -> str:
+        self._validate_policy(policy)
+        ops = PolicyMapper.convert_policy_to_operations(policy)
+
+        operations_desc = []
+        for op in ops:
+            hive_str = "HKEY_LOCAL_MACHINE" if op.hive == "HKLM" else "HKEY_CURRENT_USER"
+            operations_desc.append(
+                f"- Set value '{op.value_name}' in key '{hive_str}\\{op.key}' to {op.value_data} (Type: {op.value_type})"
+            )
+
+        ops_str = "\n".join(operations_desc)
+
+        prompt = f"""You are an expert Windows systems administrator and PowerShell scripter.
+Write a production-ready PowerShell remediation script to enforce the following Group Policy.
+
+Policy Name: {policy.name}
+Display Name: {policy.display_name}
+Description: {policy.explain_text}
+
+The script MUST perform the following registry operations:
+{ops_str}
+
+Requirements:
+1. Ensure the registry keys exist before attempting to set values. Create them if necessary.
+2. Use standard PowerShell cmdlets (e.g., Test-Path, New-Item, Set-ItemProperty).
+3. Include brief comments explaining the actions.
+4. Output ONLY the raw PowerShell script code, no markdown wrapping, no explanations before or after.
+"""
+
+        llm = Ollama(model=self.model_name)
+        try:
+            return llm.invoke(prompt).strip()
+        except Exception as e:
+            raise ScriptGenerationError(f"Failed to generate script using Ollama model '{self.model_name}': {e}")

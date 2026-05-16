@@ -8,7 +8,8 @@ from .strategies import (
     RemediationScriptStrategy,
     RollbackScriptStrategy,
     ValidationScriptStrategy,
-    RegFileStrategy
+    RegFileStrategy,
+    AIGeneratedScriptStrategy
 )
 
 class ScriptGenerator:
@@ -39,3 +40,6 @@ class ScriptGenerator:
 
     def generate_reg_file(self, policy: Policy) -> str:
         return self.generate(policy, RegFileStrategy())
+
+    def generate_ai_remediation_script(self, policy: Policy, model_name: str = "llama3") -> str:
+        return self.generate(policy, AIGeneratedScriptStrategy(model_name=model_name))

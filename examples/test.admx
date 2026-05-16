@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<policyDefinitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" revision="1.0" schemaVersion="1.0" xmlns="http://schemas.microsoft.com/GroupPolicy/2006/07/PolicyDefinitions">
+  <policyNamespaces>
+    <target prefix="test" namespace="Microsoft.Policies.Test" />
+  </policyNamespaces>
+  <resources minRequiredRevision="1.0" />
+  <categories>
+    <category name="Cat_Test" displayName="$(string.Cat_Test)" />
+    <category name="Cat_SubTest" displayName="$(string.Cat_SubTest)">
+      <parentCategory ref="Cat_Test" />
+    </category>
+  </categories>
+  <policies>
+    <policy name="TestPolicy" class="Machine" displayName="$(string.Pol_TestPolicy)" explainText="$(string.Pol_TestPolicy_Help)" presentation="$(presentation.TestPresentation)" key="Software\Policies\Test">
+      <parentCategory ref="Cat_SubTest" />
+      <supportedOn ref="Pol_Supported" />
+      <elements>
+        <enum id="TestDropdown" valueName="TestValue">
+          <item displayName="$(string.Enum_Option1)">
+            <value>
+              <decimal value="1" />
+            </value>
+          </item>
+          <item displayName="$(string.Enum_Option2)">
+            <value>
+              <decimal value="0" />
+            </value>
+          </item>
+        </enum>
+        <boolean id="TestBoolean" valueName="BoolVal">
+          <trueValue>
+            <decimal value="1" />
+          </trueValue>
+          <falseValue>
+            <decimal value="0" />
+          </falseValue>
+        </boolean>
+      </elements>
+    </policy>
+  </policies>
+</policyDefinitions>

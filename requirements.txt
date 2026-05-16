@@ -1,0 +1,11 @@
+lxml
+chardet
+fastapi
+uvicorn
+jinja2
+deepdiff
+langchain
+langchain-community
+langchain-chroma
+chromadb
+networkx

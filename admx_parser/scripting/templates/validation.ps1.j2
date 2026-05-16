@@ -1,0 +1,50 @@
+<#
+.SYNOPSIS
+Validation script for policy: {{ policy_name }}
+
+.DESCRIPTION
+Validates that the policy is successfully applied post-remediation.
+#>
+
+$isCompliant = $true
+$errors = @()
+
+{% for op in operations %}
+{% set hive_ps = "HKLM:" if op.hive == "HKLM" else "HKCU:" %}
+$regPath = "{{ hive_ps }}\{{ op.key }}"
+$valName = "{{ op.value_name }}"
+
+{% if op.action == 'set' %}
+if (-not (Test-Path $regPath)) {
+    $isCompliant = $false
+    $errors += "Missing registry key: $regPath"
+} else {
+    $currentVal = (Get-ItemProperty -Path $regPath -Name $valName -ErrorAction SilentlyContinue).$valName
+    {% if op.value_type in ['DWORD', 'QWORD'] %}
+    if ($null -eq $currentVal -or [int]$currentVal -ne {{ op.value_data }}) {
+    {% else %}
+    if ($null -eq $currentVal -or [string]$currentVal -ne "{{ op.value_data }}") {
+    {% endif %}
+        $isCompliant = $false
+        $errors += "Value mismatch at $regPath\$valName (Expected: {{ op.value_data }}, Got: $currentVal)"
+    }
+}
+{% elif op.action == 'remove' %}
+if (Test-Path $regPath) {
+    $currentVal = (Get-ItemProperty -Path $regPath -Name $valName -ErrorAction SilentlyContinue).$valName
+    if ($null -ne $currentVal) {
+        $isCompliant = $false
+        $errors += "Value still exists at $regPath\$valName"
+    }
+}
+{% endif %}
+{% endfor %}
+
+if ($isCompliant) {
+    Write-Output "Validation Passed: Policy is compliant."
+    exit 0
+} else {
+    Write-Output "Validation Failed: Policy is non-compliant."
+    $errors | ForEach-Object { Write-Output " - $_" }
+    exit 1
+}

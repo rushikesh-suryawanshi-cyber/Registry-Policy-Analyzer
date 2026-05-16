@@ -1,0 +1,56 @@
+<#
+.SYNOPSIS
+Remediation script for policy: {{ policy_name }}
+
+.DESCRIPTION
+Applies the required registry settings and creates a rollback snapshot.
+#>
+
+$ErrorActionPreference = "Stop"
+
+# Create Rollback Directory
+$rollbackDir = "C:\PolicyRollbacks\{{ policy_name | replace(' ', '_') | replace('/', '_') }}"
+if (-not (Test-Path $rollbackDir)) {
+    New-Item -ItemType Directory -Force -Path $rollbackDir | Out-Null
+}
+
+$timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+
+{% for op in operations %}
+{% set hive_ps = "HKLM:" if op.hive == "HKLM" else "HKCU:" %}
+$regPath = "{{ hive_ps }}\{{ op.key }}"
+$valName = "{{ op.value_name }}"
+
+# Snapshot existing key if it exists
+if (Test-Path $regPath) {
+    $exportPath = Join-Path $rollbackDir "{{ op.hive }}_{{ loop.index }}_$timestamp.reg"
+    # Using reg.exe to export
+    & reg.exe export "{{ op.hive }}\{{ op.key }}" $exportPath /y | Out-Null
+}
+
+# Ensure parent key exists
+if (-not (Test-Path $regPath)) {
+    New-Item -Path $regPath -Force | Out-Null
+}
+
+{% if op.action == 'set' %}
+{% if op.value_type == 'MultiString' %}
+$valData = @({% for item in op.value_data %}"{{ item }}"{% if not loop.last %},{% endif %}{% endfor %})
+{% elif op.value_type == 'Binary' %}
+$valData = [byte[]]({% for item in op.value_data %}0x{{ item }}{% if not loop.last %},{% endif %}{% endfor %})
+{% else %}
+$valData = {% if op.value_type in ['DWORD', 'QWORD'] %}{{ op.value_data }}{% else %}"{{ op.value_data }}"{% endif %}
+
+{% endif %}
+Set-ItemProperty -Path $regPath -Name $valName -Value $valData -Type {{ op.value_type }} -Force | Out-Null
+Write-Output "Set $valName in $regPath"
+{% elif op.action == 'remove' %}
+if ($null -ne (Get-ItemProperty -Path $regPath -Name $valName -ErrorAction SilentlyContinue)) {
+    Remove-ItemProperty -Path $regPath -Name $valName -Force | Out-Null
+    Write-Output "Removed $valName from $regPath"
+}
+{% endif %}
+{% endfor %}
+
+Write-Output "Remediation complete."
+exit 0

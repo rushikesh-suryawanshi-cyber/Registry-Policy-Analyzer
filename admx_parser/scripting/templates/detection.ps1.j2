@@ -1,0 +1,45 @@
+<#
+.SYNOPSIS
+Detection script for policy: {{ policy_name }}
+
+.DESCRIPTION
+Checks if the registry settings for this policy are applied.
+#>
+
+$isCompliant = $true
+
+{% for op in operations %}
+{% set hive_ps = "HKLM:" if op.hive == "HKLM" else "HKCU:" %}
+$regPath = "{{ hive_ps }}\{{ op.key }}"
+$valName = "{{ op.value_name }}"
+
+{% if op.action == 'set' %}
+if (-not (Test-Path $regPath)) {
+    $isCompliant = $false
+} else {
+    $currentVal = (Get-ItemProperty -Path $regPath -Name $valName -ErrorAction SilentlyContinue).$valName
+    {% if op.value_type in ['DWORD', 'QWORD'] %}
+    if ($null -eq $currentVal -or [int]$currentVal -ne {{ op.value_data }}) {
+    {% else %}
+    if ($null -eq $currentVal -or [string]$currentVal -ne "{{ op.value_data }}") {
+    {% endif %}
+        $isCompliant = $false
+    }
+}
+{% elif op.action == 'remove' %}
+if (Test-Path $regPath) {
+    $currentVal = (Get-ItemProperty -Path $regPath -Name $valName -ErrorAction SilentlyContinue).$valName
+    if ($null -ne $currentVal) {
+        $isCompliant = $false
+    }
+}
+{% endif %}
+{% endfor %}
+
+if ($isCompliant) {
+    Write-Output "Compliant"
+    exit 0
+} else {
+    Write-Output "Non-Compliant"
+    exit 1
+}

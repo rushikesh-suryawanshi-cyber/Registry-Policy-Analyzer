@@ -1,0 +1,20 @@
+Windows Registry Editor Version 5.00
+
+{% for key_group, ops in grouped_operations.items() %}
+[{{ key_group }}]
+{% for op in ops %}
+{% if op.action == 'set' %}
+{% if op.value_type == 'DWORD' %}
+"{{ op.value_name }}"=dword:{{ '%08x' % op.value_data|int }}
+{% elif op.value_type == 'String' %}
+"{{ op.value_name }}"="{{ op.value_data|replace('\\', '\\\\')|replace('"', '\\"') }}"
+{% else %}
+; Unsupported REG file type: {{ op.value_type }}
+"{{ op.value_name }}"="{{ op.value_data }}"
+{% endif %}
+{% elif op.action == 'remove' %}
+"{{ op.value_name }}"=-
+{% endif %}
+{% endfor %}
+
+{% endfor %}

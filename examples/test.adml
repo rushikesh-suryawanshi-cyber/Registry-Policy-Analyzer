@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<policyDefinitionResources xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" revision="1.0" schemaVersion="1.0" xmlns="http://schemas.microsoft.com/GroupPolicy/2006/07/PolicyDefinitions">
+  <displayName>Test ADML</displayName>
+  <description>Test ADML Description</description>
+  <resources>
+    <stringTable>
+      <string id="Cat_Test">Test Category</string>
+      <string id="Cat_SubTest">Sub Test Category</string>
+      <string id="Pol_TestPolicy">My Test Policy</string>
+      <string id="Pol_TestPolicy_Help">This is an explain text for the test policy.</string>
+      <string id="Pol_Supported">Windows 10 and later</string>
+      <string id="Enum_Option1">Enabled - Option 1</string>
+      <string id="Enum_Option2">Disabled - Option 2</string>
+    </stringTable>
+    <presentationTable>
+      <presentation id="TestPresentation">
+        <dropdownList refId="TestDropdown" defaultItem="0">Choose an option:</dropdownList>
+      </presentation>
+    </presentationTable>
+  </resources>
+</policyDefinitionResources>

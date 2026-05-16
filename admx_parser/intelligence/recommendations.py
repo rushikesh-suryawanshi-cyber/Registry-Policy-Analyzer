@@ -1,5 +1,5 @@
 from typing import List, Dict, Any, Optional
-from langchain_community.llms import Ollama
+from langchain_ollama import OllamaLLM
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
@@ -8,7 +8,7 @@ class IntelligenceAgent:
     """LangChain-powered agent for advanced AI insights (Hardening, Migration, Explainability)."""
 
     def __init__(self, llm_model: str = "llama3.2:1b"):
-        self.llm = Ollama(model=llm_model)
+        self.llm = OllamaLLM(model=llm_model)
 
     def explain_policy(self, policy_data: Dict[str, Any]) -> str:
         """Explains a complex policy setting in simple terms."""

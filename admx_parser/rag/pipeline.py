@@ -1,6 +1,6 @@
 import logging
 from typing import Dict, Any, Optional
-from langchain_community.llms import Ollama
+from langchain_ollama import OllamaLLM
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 
@@ -17,7 +17,7 @@ class PolicyRAGPipeline:
             persist_directory=persist_directory,
             model_name=embed_model
         )
-        self.llm = Ollama(model=llm_model)
+        self.llm = OllamaLLM(model=llm_model)
         
     def _format_docs(self, docs):
         """Formats the retrieved LangChain documents into a single context string."""

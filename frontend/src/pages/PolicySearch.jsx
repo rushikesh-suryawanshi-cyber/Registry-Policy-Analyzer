@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Search as SearchIcon, Loader2, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
 import { searchByKeyword } from '../services/api';
 

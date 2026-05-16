@@ -1,22 +1,78 @@
-import React from 'react';
-import { Upload, ArrowRight, GitCommit } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Upload, ArrowRight, GitCommit, FileJson } from 'lucide-react';
 
 export default function VersionCompare() {
+  const oldFileInputRef = useRef(null);
+  const newFileInputRef = useRef(null);
+
+  const [oldFile, setOldFile] = useState(null);
+  const [newFile, setNewFile] = useState(null);
+
+  const handleFileChange = (setter) => (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setter(e.target.files[0]);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold text-white">Version Compare</h1>
       
       <div className="flex items-center gap-4">
-        <div className="flex-1 bg-[#2D2D2D] border border-dashed border-[#333333] rounded-lg p-8 flex flex-col items-center justify-center cursor-pointer hover:border-[#0078D4] transition-colors shadow-sm group">
-          <Upload className="text-gray-400 group-hover:text-[#0078D4] mb-2 transition-colors" />
-          <p className="text-sm font-medium text-white">Upload Old ADMX Snapshot</p>
-          <p className="text-xs text-gray-500">output_v1.json</p>
+        {/* Old File Upload */}
+        <div
+          onClick={() => oldFileInputRef.current?.click()}
+          className={`flex-1 bg-[#2D2D2D] border border-dashed ${oldFile ? 'border-[#0078D4]' : 'border-[#333333]'} rounded-lg p-8 flex flex-col items-center justify-center cursor-pointer hover:border-[#0078D4] hover:bg-[#1a1a1a] transition-colors shadow-sm group`}
+        >
+          <input
+            type="file"
+            ref={oldFileInputRef}
+            onChange={handleFileChange(setOldFile)}
+            accept=".json"
+            className="hidden"
+          />
+          {oldFile ? (
+            <>
+              <FileJson className="text-[#0078D4] mb-2 transition-colors" />
+              <p className="text-sm font-medium text-[#0078D4]">Old Snapshot Selected</p>
+              <p className="text-xs text-gray-400 mt-1">{oldFile.name}</p>
+            </>
+          ) : (
+            <>
+              <Upload className="text-gray-400 group-hover:text-[#0078D4] mb-2 transition-colors" />
+              <p className="text-sm font-medium text-white">Upload Old ADMX Snapshot</p>
+              <p className="text-xs text-gray-500 mt-1">Select a JSON file</p>
+            </>
+          )}
         </div>
+
         <ArrowRight className="text-[#333333]" size={32} />
-        <div className="flex-1 bg-[#2D2D2D] border border-dashed border-[#0078D4] rounded-lg p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-[#111111] transition-colors shadow-sm group">
-          <Upload className="text-[#0078D4] mb-2" />
-          <p className="text-sm font-medium text-[#0078D4]">Upload New ADMX Snapshot</p>
-          <p className="text-xs text-gray-500">output_v2.json (Ready)</p>
+
+        {/* New File Upload */}
+        <div
+          onClick={() => newFileInputRef.current?.click()}
+          className={`flex-1 bg-[#2D2D2D] border border-dashed ${newFile ? 'border-[#0078D4]' : 'border-[#333333]'} rounded-lg p-8 flex flex-col items-center justify-center cursor-pointer hover:border-[#0078D4] hover:bg-[#1a1a1a] transition-colors shadow-sm group`}
+        >
+          <input
+            type="file"
+            ref={newFileInputRef}
+            onChange={handleFileChange(setNewFile)}
+            accept=".json"
+            className="hidden"
+          />
+          {newFile ? (
+            <>
+              <FileJson className="text-[#0078D4] mb-2 transition-colors" />
+              <p className="text-sm font-medium text-[#0078D4]">New Snapshot Selected</p>
+              <p className="text-xs text-gray-400 mt-1">{newFile.name}</p>
+            </>
+          ) : (
+            <>
+              <Upload className="text-gray-400 group-hover:text-[#0078D4] mb-2 transition-colors" />
+              <p className="text-sm font-medium text-white">Upload New ADMX Snapshot</p>
+              <p className="text-xs text-gray-500 mt-1">Select a JSON file</p>
+            </>
+          )}
         </div>
       </div>
 

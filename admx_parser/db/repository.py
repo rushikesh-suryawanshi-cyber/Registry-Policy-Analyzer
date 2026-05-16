@@ -105,6 +105,50 @@ class PolicyRepository:
         row = cursor.fetchone()
         return dict(row) if row else None
 
+    def get_policy_by_name(self, policy_name: str) -> Optional[Policy]:
+        """Retrieves a single policy by its unique name, returning a Policy object."""
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM policies WHERE name = ?", (policy_name,))
+        row = cursor.fetchone()
+        if not row:
+            return None
+
+        policy_dict = dict(row)
+
+        # We need to reconstruct the Policy object.
+        # Fetch associated enum data, lists, elements if needed, but for now we just
+        # populate the basic policy fields needed for script generation.
+        # Note: A more complete implementation would fetch `policy_values`
+        # and populate `enum_data`, `elements_data`, etc.
+
+        # Quick fetch for enum data
+        cursor.execute("SELECT * FROM policy_values WHERE policy_id = ? AND type = 'enum'", (policy_dict['id'],))
+        enum_rows = cursor.fetchall()
+        enum_data = None
+        if enum_rows:
+            enum_data = []
+            for erow in enum_rows:
+                enum_data.append({
+                    "displayName": erow["display_name"],
+                    "valueName": erow["value_name"],
+                    "value": erow["value"]
+                })
+
+        return Policy(
+            name=policy_dict.get("name"),
+            class_type=policy_dict.get("class_type"),
+            key=policy_dict.get("key"),
+            value_name=policy_dict.get("value_name"),
+            display_name=policy_dict.get("display_name"),
+            explain_text=policy_dict.get("explain_text"),
+            gpo_path=policy_dict.get("gpo_path"),
+            enabled_value=policy_dict.get("enabled_value"),
+            disabled_value=policy_dict.get("disabled_value"),
+            min_value=policy_dict.get("min_value"),
+            max_value=policy_dict.get("max_value"),
+            enum_data=enum_data
+        )
+
     def update_policy(self, policy_id: int, updates: Dict[str, Any]) -> bool:
         """Updates specific fields of a policy."""
         if not updates:

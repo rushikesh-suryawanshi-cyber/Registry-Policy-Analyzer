@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .routers import search
 from .routers import assistant
 from .routers import registry
+from .routers import scripting
 
 app = FastAPI(
     title="Windows Policy Intelligence API",
@@ -22,6 +23,7 @@ app.add_middleware(
 app.include_router(search.router)
 app.include_router(assistant.router)
 app.include_router(registry.router)
+app.include_router(scripting.router)
 
 @app.get("/")
 def read_root():

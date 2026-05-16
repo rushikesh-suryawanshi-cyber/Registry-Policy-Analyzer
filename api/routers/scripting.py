@@ -16,14 +16,14 @@ generator = ScriptGenerator()
 @router.get("/generate/{policy_name}", response_class=PlainTextResponse)
 def generate_script(
     policy_name: str,
-    script_type: str = "remediation",  # can be detection, remediation, rollback, validation, reg, ai_remediation
+    script_type: str = "remediation",  # can be detection, remediation, rollback, validation, reg, ai_remediation, intune
     model: str = "llama3", # Only used if script_type is ai_remediation
     db: PolicyRepository = Depends(get_repository)
 ):
     """
     Generates a script for a specific policy.
 
-    Valid script_type values: detection, remediation, rollback, validation, reg, ai_remediation
+    Valid script_type values: detection, remediation, rollback, validation, reg, ai_remediation, intune
     """
     policy = db.get_policy_by_name(policy_name)
     if not policy:
@@ -42,10 +42,12 @@ def generate_script(
             return generator.generate_reg_file(policy)
         elif script_type == "ai_remediation":
             return generator.generate_ai_remediation_script(policy, model_name=model)
+        elif script_type == "intune":
+            return generator.generate_intune_omauri(policy)
         else:
             raise HTTPException(
                 status_code=400,
-                detail="Invalid script_type. Must be one of: detection, remediation, rollback, validation, reg, ai_remediation"
+                detail="Invalid script_type. Must be one of: detection, remediation, rollback, validation, reg, ai_remediation, intune"
             )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating script: {str(e)}")

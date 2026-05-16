@@ -62,6 +62,40 @@ class RegFileStrategy(ScriptGenerationStrategy):
         grouped = PolicyMapper.get_grouped_operations(ops)
         return template.render(grouped_operations=grouped)
 
+class IntuneOMAURIStrategy(ScriptGenerationStrategy):
+    def generate(self, policy: Policy, env: Environment) -> str:
+        self._validate_policy(policy)
+        ops = PolicyMapper.convert_policy_to_operations(policy)
+
+        output = [
+            f"Intune Custom Configuration Profile (OMA-URI) for: {policy.name}",
+            f"Description: {policy.display_name or policy.name}",
+            "-" * 60
+        ]
+
+        if not ops:
+            output.append("No registry operations found to map to OMA-URI.")
+            return "\n".join(output)
+
+        for idx, op in enumerate(ops, 1):
+            # A rough mapping to ADMX-backed OMA-URI formats for demonstration
+            # The actual OMA-URI path depends heavily on the specific ADMX ingestion,
+            # but this provides the structured data an admin needs to build the profile.
+            data_type = op.value_type if op.value_type else 'Integer'
+            if data_type.upper() == 'DWORD':
+                data_type = 'Integer'
+
+            output.extend([
+                f"Row {idx}:",
+                f"  Name: {op.value_name or op.key.split(r'\\')[-1]}",
+                f"  OMA-URI Path: ./Device/Vendor/MSFT/Policy/Config/Operations/{op.key.replace(r'\\', '/')}/{op.value_name or 'default'}",
+                f"  Data Type: {data_type}",
+                f"  Value: {op.value_data}",
+                ""
+            ])
+
+        return "\n".join(output)
+
 class AIGeneratedScriptStrategy(ScriptGenerationStrategy):
     def __init__(self, model_name: str = "llama3"):
         self.model_name = model_name

@@ -76,11 +76,26 @@ Run the intelligence module to detect registry conflicts, generate a dependency 
 python intelligence_examples.py
 ```
 
-### Script Generation
-The engine can dynamically generate PowerShell `.ps1` and Registry `.reg` files. Test the Jinja2 engine locally:
+### Script Generation & Export
+The engine can dynamically generate PowerShell `.ps1` and Registry `.reg` files using a modular Strategy architecture. It also supports exporting policies to Intune Custom Configuration Profiles (OMA-URI) and generating scripts using local AI models (Ollama).
+
+Test the generation locally:
 ```powershell
 python script_examples.py
 ```
+
+**API Integration:**
+You can dynamically download scripts directly from the FastAPI backend using the `/scripts/generate/{policy_name}` endpoint.
+Supported `script_type` query parameters:
+- `detection` (PowerShell Detection)
+- `remediation` (PowerShell Remediation)
+- `rollback` (PowerShell Rollback)
+- `validation` (PowerShell Validation)
+- `reg` (Registry File)
+- `intune` (Intune OMA-URI Profile Configuration)
+- `ai_remediation` (Generates a script dynamically using Ollama. You can specify the model via `&model=llama3`).
+
+*Example:* `GET /scripts/generate/DisableRegistryTools?script_type=intune`
 
 ### ADMX Version Diffing
 To compare two different versions of ADMX outputs (e.g., Windows 10 vs Windows 11 policies):

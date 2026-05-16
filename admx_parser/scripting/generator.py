@@ -9,7 +9,8 @@ from .strategies import (
     RollbackScriptStrategy,
     ValidationScriptStrategy,
     RegFileStrategy,
-    AIGeneratedScriptStrategy
+    AIGeneratedScriptStrategy,
+    IntuneOMAURIStrategy
 )
 
 class ScriptGenerator:
@@ -43,3 +44,6 @@ class ScriptGenerator:
 
     def generate_ai_remediation_script(self, policy: Policy, model_name: str = "llama3") -> str:
         return self.generate(policy, AIGeneratedScriptStrategy(model_name=model_name))
+
+    def generate_intune_omauri(self, policy: Policy) -> str:
+        return self.generate(policy, IntuneOMAURIStrategy())

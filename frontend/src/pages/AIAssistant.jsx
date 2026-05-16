@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Loader2, AlertTriangle } from 'lucide-react';
 import { chatWithAssistant } from '../services/api';
 

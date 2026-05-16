@@ -1,6 +1,5 @@
 import logging
 import re
-import difflib
 
 def setup_logger(name: str = "admx_parser", level: int = logging.INFO) -> logging.Logger:
     logger = logging.getLogger(name)
@@ -12,30 +11,11 @@ def setup_logger(name: str = "admx_parser", level: int = logging.INFO) -> loggin
         logger.setLevel(level)
     return logger
 
-def enhanced_lookup(token, adml_resources, threshold=0.4):
+def enhanced_lookup(token, adml_resources):
     token_lower = token.lower()
-    substring_candidates = [key for key in adml_resources if token_lower in key.lower()]
-    if substring_candidates:
-        if len(substring_candidates) == 1:
-            return adml_resources[substring_candidates[0]]
-        best_match = None
-        best_ratio = 0.0
-        for key in substring_candidates:
-            ratio = difflib.SequenceMatcher(None, token_lower, key.lower()).ratio()
-            if ratio > best_ratio:
-                best_ratio = ratio
-                best_match = key
-        if best_ratio >= threshold:
-            return adml_resources[best_match]
-    best_match = None
-    best_ratio = 0.0
     for key in adml_resources:
-        ratio = difflib.SequenceMatcher(None, token_lower, key.lower()).ratio()
-        if ratio > best_ratio:
-            best_ratio = ratio
-            best_match = key
-    if best_match and best_ratio >= threshold:
-        return adml_resources[best_match]
+        if key.lower() == token_lower:
+            return adml_resources[key]
     return None
 
 def resolve_references(text, adml_resources):

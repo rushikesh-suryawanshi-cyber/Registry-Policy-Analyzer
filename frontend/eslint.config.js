@@ -27,7 +27,7 @@ export default [
       'react/jsx-uses-react': 'off',
       'react/react-in-jsx-scope': 'off',
       'react-hooks/set-state-in-effect': 'off',
-      'no-unused-vars': 'warn'
+      'no-unused-vars': 'off'
     },
   },
 ]

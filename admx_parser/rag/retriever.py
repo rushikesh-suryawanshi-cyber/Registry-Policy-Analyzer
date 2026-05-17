@@ -1,6 +1,6 @@
 from typing import List, Dict, Any, Optional
 from langchain_chroma import Chroma
-from langchain_community.embeddings import OllamaEmbeddings
+from langchain_ollama import OllamaEmbeddings
 from langchain_core.documents import Document
 
 class PolicyRetriever:

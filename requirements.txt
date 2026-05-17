@@ -7,5 +7,6 @@ deepdiff
 langchain
 langchain-community
 langchain-chroma
+langchain-ollama
 chromadb
 networkx

@@ -11,7 +11,7 @@ class DatabaseContext:
         self._connection = None
 
     def __enter__(self) -> sqlite3.Connection:
-        self._connection = sqlite3.connect(self.db_path)
+        self._connection = sqlite3.connect(self.db_path, check_same_thread=False)
         # Enable foreign keys constraint enforcement
         self._connection.execute("PRAGMA foreign_keys = ON;")
         self._connection.row_factory = sqlite3.Row
